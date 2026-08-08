@@ -2,17 +2,46 @@ import type { APIRoute } from 'astro';
 
 export const prerender = false;
 
-export const GET: APIRoute = async ({ request, locals }) => {
-  const runtime = (locals as any)?.runtime;
-  const env = runtime?.env || process.env || {};
-  const clientId = env.GITHUB_CLIENT_ID;
-  const clientSecret = env.GITHUB_CLIENT_SECRET;
+function resolveEnv(context: any, key: string): string | undefined {
+  const locals = context.locals as any;
+  return (
+    locals?.runtime?.env?.[key] ||
+    locals?.env?.[key] ||
+    locals?.cloudflare?.env?.[key] ||
+    context?.env?.[key] ||
+    (typeof process !== 'undefined' ? process.env?.[key] : undefined) ||
+    import.meta.env?.[key]
+  );
+}
+
+export const GET: APIRoute = async (context) => {
+  const { request } = context;
+  const clientId = resolveEnv(context, 'GITHUB_CLIENT_ID');
+  const clientSecret = resolveEnv(context, 'GITHUB_CLIENT_SECRET');
 
   const url = new URL(request.url);
   const code = url.searchParams.get('code');
 
   if (!code) {
     return new Response('Missing code parameter', { status: 400 });
+  }
+
+  if (!clientId || !clientSecret) {
+    return new Response(
+      JSON.stringify(
+        {
+          error: 'MISSING_OAUTH_CREDENTIALS',
+          message:
+            'GITHUB_CLIENT_ID or GITHUB_CLIENT_SECRET is missing from Cloudflare environment variables.',
+        },
+        null,
+        2
+      ),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
   }
 
   const tokenResponse = await fetch('https://github.com/login/oauth/access_token', {
@@ -22,8 +51,8 @@ export const GET: APIRoute = async ({ request, locals }) => {
       Accept: 'application/json',
     },
     body: JSON.stringify({
-      client_id: clientId,
-      client_secret: clientSecret,
+      client_id: clientId.trim(),
+      client_secret: clientSecret.trim(),
       code: code,
     }),
   });
