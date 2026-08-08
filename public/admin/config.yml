@@ -1,0 +1,48 @@
+# Enable Local Git Backend for local development (no login/redirect required)
+local_backend: true
+
+backend:
+  name: github
+  repo: buckypinkman/personal-site-v1
+  branch: main
+  auth_endpoint: api/auth
+
+# Media Files Storage
+media_folder: "public/images/uploads"
+public_folder: "/images/uploads"
+
+# Editorial Workflow
+publish_mode: simple
+
+# Content Collections Configuration
+collections:
+  - name: "blog"
+    label: "Blog Posts"
+    folder: "src/content/blog"
+    create: true
+    slug: "{{slug}}"
+    summary: "{{title}} ({{category}}) - {{pubDate}}"
+    editor:
+      preview: true
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Description", name: "description", widget: "text" }
+      - { 
+          label: "Publish Date", 
+          name: "pubDate", 
+          widget: "datetime", 
+          date_format: "YYYY-MM-DD", 
+          time_format: false, 
+          format: "YYYY-MM-DD" 
+        }
+      - { 
+          label: "Category", 
+          name: "category", 
+          widget: "select", 
+          options: ["Tech", "Things i learn"],
+          default: "Tech"
+        }
+      - { label: "Tags", name: "tags", widget: "list", default: ["Tech"] }
+      - { label: "Reading Time", name: "readingTime", widget: "string", default: "5 min read" }
+      - { label: "Featured Article", name: "featured", widget: "boolean", default: false, required: false }
+      - { label: "Body", name: "body", widget: "markdown" }
