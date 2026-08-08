@@ -1,0 +1,19 @@
+---
+// src/components/DotGridAccent.astro
+interface Props {
+  className?: string;
+  width?: string;
+  height?: string;
+}
+
+const { className = '', width = 'w-full', height = 'h-36' } = Astro.props;
+---
+
+<div class={`relative ${width} ${height} pointer-events-none select-none ${className}`} aria-hidden="true">
+  <!-- Dotted Matrix halftone pattern -->
+  <div class="absolute inset-0 dot-matrix-pattern opacity-60"></div>
+  
+  <!-- Subtle gradient mask for soft edges -->
+  <div class="absolute inset-0 bg-gradient-to-r from-[#09090b]/80 via-transparent to-[#09090b]/80"></div>
+  <div class="absolute inset-0 bg-gradient-to-b from-[#09090b]/80 via-transparent to-[#09090b]/80"></div>
+</div>

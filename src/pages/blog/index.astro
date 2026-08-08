@@ -1,0 +1,171 @@
+---
+// src/pages/blog/index.astro
+import Layout from '../../layouts/Layout.astro';
+import DotGridAccent from '../../components/DotGridAccent.astro';
+import { getCollection } from 'astro:content';
+
+let posts = [];
+try {
+  posts = (await getCollection('blog')).sort(
+    (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+  );
+} catch {
+  posts = [];
+}
+
+const categories = [
+  'All',
+  'Tech',
+  'Things i learn',
+];
+---
+
+<Layout
+  title="Technical Blog & Engineering Notes | Rangga Dimas"
+  description="In-depth articles and case studies on distributed systems, Go concurrency, database scaling, and cloud architecture by Rangga Dimas."
+  isFixedScreen={false}
+>
+  <div class="max-w-6xl mx-auto px-6 md:px-12 py-10 w-full">
+    
+    <!-- Blog Header Section -->
+    <div class="mb-10">
+      <h1 class="font-mono text-3xl sm:text-5xl font-bold tracking-tight text-white">
+        Blog
+      </h1>
+    </div>
+
+    <!-- Category Filter Tabs -->
+    <div class="flex items-center gap-2 overflow-x-auto pb-3 mb-8 no-scrollbar font-mono text-xs border-b border-zinc-800/80">
+      {categories.map((cat, idx) => (
+        <button
+          type="button"
+          data-category={cat}
+          class={`category-tab px-3 py-1.5 rounded-md whitespace-nowrap transition-all ${
+            idx === 0
+              ? 'bg-zinc-100 text-zinc-950 font-semibold shadow'
+              : 'bg-zinc-900/60 text-zinc-400 hover:text-white hover:bg-zinc-800/60 border border-zinc-800/80'
+          }`}
+        >
+          {cat}
+        </button>
+      ))}
+    </div>
+
+    <!-- Articles List Container or Empty State -->
+    {posts.length > 0 ? (
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5" id="posts-container">
+        {posts.map((post) => {
+          const formattedDate = new Intl.DateTimeFormat('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          }).format(post.data.pubDate);
+
+          return (
+            <article
+              data-category={post.data.category}
+              class="post-card group relative bg-[#121215] hover:bg-[#18181d] border border-zinc-800/80 hover:border-zinc-700/90 p-6 transition-all duration-200 flex flex-col justify-between"
+            >
+              <div>
+                <!-- Top Metadata: Date, Category Pill, Reading Time -->
+                <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-mono mb-4 text-zinc-400">
+                  <span class="px-2 py-0.5 rounded bg-zinc-800/80 text-emerald-400 font-medium border border-zinc-750">
+                    {post.data.category}
+                  </span>
+                  <div class="flex items-center gap-2 text-zinc-500">
+                    <span>{formattedDate}</span>
+                    <span>•</span>
+                    <span>{post.data.readingTime}</span>
+                  </div>
+                </div>
+
+                <!-- Title -->
+                <h2 class="font-mono text-lg font-bold text-white group-hover:text-emerald-300 transition-colors leading-snug">
+                  <a href={`/blog/${post.slug}`} class="focus:outline-none after:absolute after:inset-0">
+                    {post.data.title}
+                  </a>
+                </h2>
+
+                <!-- Description -->
+                <p class="mt-2.5 text-xs sm:text-sm text-zinc-400 font-sans leading-relaxed">
+                  {post.data.description}
+                </p>
+              </div>
+
+              <!-- Tags & Arrow -->
+              <div class="mt-6 pt-4 border-t border-zinc-800/50 flex items-center justify-between gap-2 text-xs font-mono">
+                <div class="flex flex-wrap gap-1.5">
+                  {post.data.tags.slice(0, 3).map((tag) => (
+                    <span class="px-1.5 py-0.5 text-[10px] bg-zinc-850 text-zinc-400 rounded">
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+                <span class="text-zinc-500 group-hover:text-emerald-400 group-hover:translate-x-1 transition-all">
+                  Read Article →
+                </span>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    ) : (
+      <div class="py-20 border border-dashed border-zinc-800/80 rounded-none text-center bg-[#111114]/30 font-mono">
+        <div class="inline-flex items-center justify-center w-9 h-9 rounded bg-zinc-900 border border-zinc-800 text-zinc-500 mb-3 text-xs">
+          00
+        </div>
+        <h3 class="text-sm font-semibold text-zinc-300">No articles published yet</h3>
+        <p class="mt-1 text-xs text-zinc-500 max-w-sm mx-auto font-sans">
+          Writing in progress. Articles will appear here soon under Tech and Things i learn.
+        </p>
+      </div>
+    )}
+
+    <!-- Empty State for filtered categories with no matches -->
+    <div id="no-posts-msg" class="hidden text-center py-16 font-mono text-sm text-zinc-500">
+      No articles found under this category.
+    </div>
+
+  </div>
+</Layout>
+
+<script>
+  function setupCategoryFiltering() {
+    const tabs = document.querySelectorAll<HTMLButtonElement>('.category-tab');
+    const posts = document.querySelectorAll<HTMLElement>('.post-card');
+    const noPosts = document.getElementById('no-posts-msg');
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const selectedCat = tab.getAttribute('data-category');
+
+        // Update active tab styles
+        tabs.forEach((t) => {
+          t.classList.remove('bg-zinc-100', 'text-zinc-950', 'font-semibold', 'shadow');
+          t.classList.add('bg-zinc-900/60', 'text-zinc-400', 'hover:text-white', 'hover:bg-zinc-800/60', 'border', 'border-zinc-800/80');
+        });
+        tab.classList.remove('bg-zinc-900/60', 'text-zinc-400', 'hover:text-white', 'hover:bg-zinc-800/60', 'border', 'border-zinc-800/80');
+        tab.classList.add('bg-zinc-100', 'text-zinc-950', 'font-semibold', 'shadow');
+
+        // Filter cards
+        let visibleCount = 0;
+        posts.forEach((card) => {
+          const cardCat = card.getAttribute('data-category');
+          if (selectedCat === 'All' || cardCat === selectedCat) {
+            card.style.display = 'flex';
+            visibleCount++;
+          } else {
+            card.style.display = 'none';
+          }
+        });
+
+        if (noPosts) {
+          noPosts.classList.toggle('hidden', visibleCount > 0);
+        }
+      });
+    });
+  }
+
+  setupCategoryFiltering();
+  document.addEventListener('astro:page-load', setupCategoryFiltering);
+</script>

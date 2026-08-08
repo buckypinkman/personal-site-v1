@@ -1,0 +1,199 @@
+---
+// src/components/BackgroundSquares.astro
+// Looped muted animated squares background inspired by minimalist engineering consoles
+---
+
+<div class="fixed inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
+  <canvas id="bg-squares-canvas" class="w-full h-full opacity-80"></canvas>
+  <div class="absolute inset-0 bg-gradient-to-t from-[#09090b] via-transparent to-[#09090b]/70"></div>
+  <div class="absolute inset-0 bg-radial-gradient"></div>
+</div>
+
+<style>
+  .bg-radial-gradient {
+    background: radial-gradient(circle at 50% 50%, rgba(18, 18, 24, 0.4) 0%, rgba(9, 9, 11, 0.93) 100%);
+  }
+</style>
+
+<script>
+  function initSquaresBackground() {
+    const canvas = document.getElementById('bg-squares-canvas') as HTMLCanvasElement | null;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
+
+    interface Square {
+      x: number;
+      y: number;
+      size: number;
+      baseAlpha: number;
+      currentAlpha: number;
+      targetAlpha: number;
+      speedX: number;
+      speedY: number;
+      pulseSpeed: number;
+      rotation: number;
+      rotationSpeed: number;
+      isFilled: boolean;
+      gridSnap: boolean;
+    }
+
+    const squares: Square[] = [];
+    const gridSize = 40;
+    const count = Math.min(Math.floor((width * height) / 12500), 80);
+
+    for (let i = 0; i < count; i++) {
+      const isFilled = Math.random() > 0.6;
+      const sizeOptions = [14, 20, 30, 44, 56];
+      const size = sizeOptions[Math.floor(Math.random() * sizeOptions.length)];
+      const baseAlpha = Math.random() * 0.14 + 0.04;
+
+      squares.push({
+        x: Math.floor(Math.random() * (width / gridSize)) * gridSize,
+        y: Math.floor(Math.random() * (height / gridSize)) * gridSize,
+        size: size,
+        baseAlpha: baseAlpha,
+        currentAlpha: baseAlpha,
+        targetAlpha: Math.random() * 0.22 + 0.07,
+        speedX: (Math.random() - 0.5) * 0.25,
+        speedY: (Math.random() - 0.5) * 0.25,
+        pulseSpeed: 0.009 + Math.random() * 0.015,
+        rotation: (Math.floor(Math.random() * 4) * Math.PI) / 2, // 0, 90, 180, 270 deg
+        rotationSpeed: (Math.random() - 0.5) * 0.0025,
+        isFilled: isFilled,
+        gridSnap: Math.random() > 0.35,
+      });
+    }
+
+    let mouseX = width / 2;
+    let mouseY = height / 2;
+    let targetMouseX = mouseX;
+    let targetMouseY = mouseY;
+
+    window.addEventListener('mousemove', (e) => {
+      targetMouseX = e.clientX;
+      targetMouseY = e.clientY;
+    }, { passive: true });
+
+    function handleResize() {
+      if (!canvas) return;
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    }
+
+    window.addEventListener('resize', handleResize, { passive: true });
+
+    let animationFrameId: number;
+
+    function render() {
+      if (!ctx || !canvas) return;
+      ctx.clearRect(0, 0, width, height);
+
+      // Smooth mouse interpolation
+      mouseX += (targetMouseX - mouseX) * 0.05;
+      mouseY += (targetMouseY - mouseY) * 0.05;
+
+      // Draw subtle grid lines
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+      ctx.lineWidth = 1;
+      
+      const step = 48;
+      ctx.beginPath();
+      for (let x = 0; x <= width; x += step) {
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+      }
+      for (let y = 0; y <= height; y += step) {
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+      }
+      ctx.stroke();
+
+      // Render floating looped squares with calibrated subtle visibility
+      for (const sq of squares) {
+        // Subtle drift
+        sq.x += sq.speedX;
+        sq.y += sq.speedY;
+
+        // Wrap around boundaries
+        if (sq.x < -sq.size) sq.x = width + sq.size;
+        if (sq.x > width + sq.size) sq.x = -sq.size;
+        if (sq.y < -sq.size) sq.y = height + sq.size;
+        if (sq.y > height + sq.size) sq.y = -sq.size;
+
+        // Alpha pulsing
+        sq.currentAlpha += (sq.targetAlpha - sq.currentAlpha) * sq.pulseSpeed;
+        if (Math.abs(sq.currentAlpha - sq.targetAlpha) < 0.015) {
+          sq.targetAlpha = sq.baseAlpha * (0.55 + Math.random() * 1.5);
+        }
+
+        // Mouse proximity subtle highlight
+        const dx = sq.x - mouseX;
+        const dy = sq.y - mouseY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        let proximityBoost = 0;
+        if (dist < 190) {
+          proximityBoost = (1 - dist / 190) * 0.18;
+        }
+
+        const alpha = Math.min(0.75, sq.currentAlpha + proximityBoost);
+
+        ctx.save();
+        ctx.translate(sq.x, sq.y);
+        ctx.rotate(sq.rotation);
+
+        if (sq.isFilled) {
+          ctx.fillStyle = `rgba(165, 170, 185, ${alpha * 0.38})`;
+          ctx.fillRect(-sq.size / 2, -sq.size / 2, sq.size, sq.size);
+        }
+
+        ctx.strokeStyle = `rgba(220, 225, 240, ${alpha * 0.95})`;
+        ctx.lineWidth = 1.1;
+        ctx.strokeRect(-sq.size / 2, -sq.size / 2, sq.size, sq.size);
+
+        // Small corner cross accent on medium & large squares
+        if (sq.size >= 40) {
+          ctx.strokeStyle = `rgba(255, 255, 255, ${alpha * 0.7})`;
+          const crossSize = 3;
+          ctx.beginPath();
+          // Top-left cross
+          ctx.moveTo(-sq.size / 2 - crossSize, -sq.size / 2);
+          ctx.lineTo(-sq.size / 2 + crossSize, -sq.size / 2);
+          ctx.moveTo(-sq.size / 2, -sq.size / 2 - crossSize);
+          ctx.lineTo(-sq.size / 2, -sq.size / 2 + crossSize);
+
+          // Bottom-right cross
+          ctx.moveTo(sq.size / 2 - crossSize, sq.size / 2);
+          ctx.lineTo(sq.size / 2 + crossSize, sq.size / 2);
+          ctx.moveTo(sq.size / 2, -sq.size / 2 - crossSize);
+          ctx.lineTo(sq.size / 2, -sq.size / 2 + crossSize);
+          ctx.stroke();
+        }
+
+        ctx.restore();
+      }
+
+      animationFrameId = requestAnimationFrame(render);
+    }
+
+    render();
+
+    // Clean up on Astro page transition
+    document.addEventListener('astro:before-swap', () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener('resize', handleResize);
+    }, { once: true });
+  }
+
+  // Initialize on load and on Astro view transitions
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSquaresBackground);
+  } else {
+    initSquaresBackground();
+  }
+  document.addEventListener('astro:page-load', initSquaresBackground);
+</script>

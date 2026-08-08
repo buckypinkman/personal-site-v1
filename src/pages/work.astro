@@ -1,0 +1,83 @@
+---
+// src/pages/work.astro
+import Layout from '../layouts/Layout.astro';
+import WorkCard from '../components/WorkCard.astro';
+
+const projects = [
+  {
+    index: "01",
+    title: "Quran online",
+    organization: "Digital Platform & Audio Streaming",
+    metric: "114 Surah",
+    delta: "+100%",
+    deltaType: "positive" as const,
+    techStack: ["TypeScript", "Next.js", "Tailwind CSS", "Audio API"],
+    description: "Modern, responsive digital Quran web application featuring verse-by-verse audio recitations, multi-language translations, and instant search.",
+    githubUrl: "https://github.com/buckypinkman",
+    liveUrl: "https://github.com/buckypinkman",
+    watermarkType: "server" as const,
+  },
+  {
+    index: "02",
+    title: "Obsidian ppt summarizer",
+    organization: "AI Knowledge Extraction Plugin",
+    metric: "AI Slides",
+    delta: "+98%",
+    deltaType: "positive" as const,
+    techStack: ["Python", "Obsidian API", "LLM", "Markdown"],
+    description: "Automated toolchain parsing PowerPoint presentations, synthesizing key architectural slide concepts, and syncing structured notes into Obsidian.",
+    githubUrl: "https://github.com/buckypinkman",
+    liveUrl: "https://github.com/buckypinkman",
+    watermarkType: "cpu" as const,
+  },
+  {
+    index: "03",
+    title: "muscleview",
+    organization: "Anatomy & Biomechanics Visualizer",
+    metric: "3D Motion",
+    delta: "+85%",
+    deltaType: "positive" as const,
+    techStack: ["TypeScript", "Three.js", "WebGL", "Tailwind"],
+    description: "Interactive 3D visualization platform mapping targeted muscle group activations, biomechanical kinematics, and exercise routines.",
+    githubUrl: "https://github.com/buckypinkman",
+    liveUrl: "https://github.com/buckypinkman",
+    watermarkType: "cube" as const,
+  }
+];
+---
+
+<Layout
+  title="Selected Work & Projects | Rangga Dimas"
+  description="Selected open-source projects and engineering work by Rangga Dimas including Quran online, Obsidian ppt summarizer, and muscleview."
+  isFixedScreen={false}
+>
+  <div class="max-w-7xl mx-auto px-6 md:px-12 py-10 w-full">
+    
+    <!-- Page Header with Monospace aesthetic (No Subtitle) -->
+    <div class="mb-10">
+      <h1 class="font-mono text-3xl sm:text-5xl font-bold tracking-tight text-white">
+        Work
+      </h1>
+    </div>
+
+    <!-- Metric Cards Grid (Showing the 3 GitHub projects) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      {projects.map((p) => (
+        <WorkCard
+          index={p.index}
+          title={p.title}
+          organization={p.organization}
+          metric={p.metric}
+          delta={p.delta}
+          deltaType={p.deltaType}
+          techStack={p.techStack}
+          description={p.description}
+          githubUrl={p.githubUrl}
+          liveUrl={p.liveUrl}
+          watermarkType={p.watermarkType}
+        />
+      ))}
+    </div>
+
+  </div>
+</Layout>

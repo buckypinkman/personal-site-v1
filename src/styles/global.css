@@ -1,0 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-primary: #09090b;
+  --bg-surface: #111114;
+  --border-subtle: #23232a;
+  --border-highlight: #3a3a46;
+  --text-primary: #f4f4f5;
+  --text-secondary: #a1a1aa;
+  --text-muted: #62626e;
+  --accent-green: #22c55e;
+  --accent-red: #ef4444;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color-scheme: dark;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Monospace font utility */
+.font-mono {
+  font-family: 'JetBrains Mono', 'Space Mono', Menlo, Monaco, Consolas, monospace;
+}
+
+/* Halftone / Dot Matrix pattern inspired by OpenCode */
+.dot-matrix-pattern {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.22) 1.3px, transparent 1.3px);
+  background-size: 8px 8px;
+}
+
+.dot-matrix-pattern-dense {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.25) 1.5px, transparent 1.5px);
+  background-size: 6px 6px;
+}
+
+.dot-matrix-faded {
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, #000 40%, transparent 95%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, #000 40%, transparent 95%);
+}
+
+/* Custom Scrollbar for blog/work pages */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0d0d10;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #27272f;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3a3a48;
+}
+
+/* Selection */
+::selection {
+  background-color: rgba(34, 197, 94, 0.25);
+  color: #ffffff;
+}
+
+/* Subtle glow utilities */
+.glow-border {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 8px 24px -4px rgba(0, 0, 0, 0.6);
+}
+
+.glow-border-hover:hover {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18), 0 12px 32px -4px rgba(0, 0, 0, 0.8);
+}

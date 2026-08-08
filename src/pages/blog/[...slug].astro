@@ -1,0 +1,222 @@
+---
+// src/pages/blog/[...slug].astro
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import DotGridAccent from '../../components/DotGridAccent.astro';
+
+export async function getStaticPaths() {
+  try {
+    const posts = await getCollection('blog');
+    if (!posts || posts.length === 0) {
+      return [];
+    }
+    return posts.map((post) => ({
+      params: { slug: post.slug },
+      props: { post },
+    }));
+  } catch {
+    return [];
+  }
+}
+
+const { post } = Astro.props;
+if (!post) {
+  return Astro.redirect('/blog');
+}
+
+const { Content } = await post.render();
+
+const formattedDate = new Intl.DateTimeFormat('en-US', {
+  month: 'long',
+  day: 'numeric',
+  year: 'numeric',
+}).format(post.data.pubDate);
+---
+
+<Layout
+  title={`${post.data.title} | Rangga Dimas`}
+  description={post.data.description}
+  isFixedScreen={false}
+>
+  <!-- Reading Progress Bar -->
+  <div id="progress-bar" class="fixed top-0 left-0 h-[2px] bg-emerald-400 z-50 transition-all duration-75 w-0"></div>
+
+  <article class="max-w-4xl mx-auto px-6 md:px-12 py-10 w-full">
+    
+    <!-- Top Back Navigation & Category -->
+    <div class="flex items-center justify-between gap-4 mb-8 text-xs font-mono">
+      <a
+        href="/blog"
+        class="inline-flex items-center gap-1.5 text-zinc-400 hover:text-white transition-colors"
+      >
+        <span>←</span>
+        <span>Back to Articles</span>
+      </a>
+
+      <div class="flex items-center gap-2">
+        <span class="px-2 py-0.5 rounded bg-zinc-800 text-emerald-400 font-medium border border-zinc-700">
+          {post.data.category}
+        </span>
+        <span class="text-zinc-500">•</span>
+        <span class="text-zinc-400">{post.data.readingTime}</span>
+      </div>
+    </div>
+
+    <!-- Article Header -->
+    <header class="mb-10 pb-8 border-b border-zinc-800/80">
+      <div class="text-xs font-mono text-zinc-500 mb-3">
+        Published on {formattedDate}
+      </div>
+
+      <h1 class="font-mono text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white leading-tight">
+        {post.data.title}
+      </h1>
+
+      <p class="mt-4 text-base sm:text-lg text-zinc-300 font-sans leading-relaxed">
+        {post.data.description}
+      </p>
+
+      <!-- Tags list -->
+      <div class="mt-6 flex flex-wrap gap-2">
+        {post.data.tags.map((tag) => (
+          <span class="px-2 py-0.5 text-xs font-mono bg-zinc-900 text-zinc-400 border border-zinc-800 rounded">
+            #{tag}
+          </span>
+        ))}
+      </div>
+    </header>
+
+    <!-- Markdown Article Content -->
+    <div class="article-body prose prose-invert max-w-none text-zinc-300 leading-relaxed font-sans">
+      <Content />
+    </div>
+
+    <!-- Author Attribution Footer Card -->
+    <div class="mt-14 p-6 bg-[#111114] border border-zinc-800 rounded flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 font-mono text-xs">
+      <div>
+        <div class="text-white font-bold">Rangga Dimas</div>
+        <div class="text-zinc-400 mt-0.5">Software Engineer • Jakarta, Indonesia</div>
+      </div>
+      <div class="flex items-center gap-3">
+        <a
+          href="https://github.com/buckypinkman"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded transition-colors"
+        >
+          GitHub: buckypinkman
+        </a>
+        <a
+          href="https://www.linkedin.com/in/rangga-dimas-a41b721a6/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="px-3 py-1.5 bg-zinc-100 hover:bg-white text-zinc-950 font-medium rounded transition-colors"
+        >
+          LinkedIn Profile ↗
+        </a>
+      </div>
+    </div>
+
+  </article>
+</Layout>
+
+<style is:global>
+  /* Custom Article Typography Styles */
+  .article-body h2 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #27272f;
+  }
+
+  .article-body h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #f4f4f5;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .article-body p {
+    margin-bottom: 1.25rem;
+    line-height: 1.8;
+  }
+
+  .article-body ul, .article-body ol {
+    margin-left: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .article-body li {
+    margin-bottom: 0.5rem;
+  }
+
+  .article-body pre {
+    background-color: #101014 !important;
+    border: 1px solid #272730;
+    padding: 1.25rem;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+  }
+
+  .article-body code:not(pre code) {
+    background-color: #1e1e24;
+    color: #34d399;
+    padding: 0.15rem 0.35rem;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85em;
+  }
+
+  .article-body blockquote {
+    border-left: 3px solid #10b981;
+    padding-left: 1rem;
+    margin: 1.5rem 0;
+    color: #a1a1aa;
+    font-style: italic;
+  }
+
+  .article-body table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 0.9rem;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .article-body th, .article-body td {
+    padding: 0.75rem 1rem;
+    border: 1px solid #272730;
+    text-align: left;
+  }
+
+  .article-body th {
+    background-color: #16161b;
+    color: #ffffff;
+  }
+</style>
+
+<script>
+  function setupReadingProgress() {
+    const bar = document.getElementById('progress-bar');
+    if (!bar) return;
+
+    window.addEventListener('scroll', () => {
+      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = height > 0 ? (winScroll / height) * 100 : 0;
+      bar.style.width = scrolled + '%';
+    }, { passive: true });
+  }
+
+  setupReadingProgress();
+  document.addEventListener('astro:page-load', setupReadingProgress);
+</script>
