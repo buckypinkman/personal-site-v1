@@ -1,6 +1,6 @@
 ---
 // src/pages/admin/index.astro
-// Native Astro route for Decap CMS Admin Portal
+// Native Astro route for Decap CMS Admin Portal with custom Cloudflare OAuth
 ---
 
 <!doctype html>
@@ -11,8 +11,6 @@
     <meta name="robots" content="noindex, nofollow" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>Content Manager | Rangga Dimas</title>
-    <!-- Netlify Identity Widget for authentication -->
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <style>
       body {
         margin: 0;
@@ -26,18 +24,5 @@
   <body>
     <!-- Decap CMS Core Script -->
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-    
-    <script>
-      // Automatically redirect user back to admin after Netlify Identity login
-      if (window.netlifyIdentity) {
-        window.netlifyIdentity.on("init", (user) => {
-          if (!user) {
-            window.netlifyIdentity.on("login", () => {
-              document.location.href = "/admin/";
-            });
-          }
-        });
-      }
-    </script>
   </body>
 </html>

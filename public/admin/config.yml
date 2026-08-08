@@ -5,6 +5,7 @@ backend:
   name: github
   repo: buckypinkman/personal-site-v1
   branch: main
+  base_url: https://ranggadimas.com # Points to your Cloudflare Pages OAuth Function (or custom domain)
   auth_endpoint: api/auth
 
 # Media Files Storage
