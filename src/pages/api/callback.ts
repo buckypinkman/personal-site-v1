@@ -1,8 +1,15 @@
-export async function onRequest(context) {
-  const url = new URL(context.request.url);
+import type { APIRoute } from 'astro';
+
+export const prerender = false;
+
+export const GET: APIRoute = async ({ request, locals }) => {
+  const runtime = (locals as any)?.runtime;
+  const env = runtime?.env || process.env || {};
+  const clientId = env.GITHUB_CLIENT_ID;
+  const clientSecret = env.GITHUB_CLIENT_SECRET;
+
+  const url = new URL(request.url);
   const code = url.searchParams.get('code');
-  const clientId = context.env.GITHUB_CLIENT_ID;
-  const clientSecret = context.env.GITHUB_CLIENT_SECRET;
 
   if (!code) {
     return new Response('Missing code parameter', { status: 400 });
@@ -12,7 +19,7 @@ export async function onRequest(context) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      Accept: 'application/json',
     },
     body: JSON.stringify({
       client_id: clientId,
@@ -21,10 +28,12 @@ export async function onRequest(context) {
     }),
   });
 
-  const data = await tokenResponse.json();
+  const data: any = await tokenResponse.json();
 
   if (data.error) {
-    return new Response(`OAuth Error: ${data.error_description || data.error}`, { status: 500 });
+    return new Response(`OAuth Error: ${data.error_description || data.error}`, {
+      status: 500,
+    });
   }
 
   const token = data.access_token;
@@ -34,7 +43,7 @@ export async function onRequest(context) {
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Authenticating...</title>
+  <title>Authenticating with GitHub...</title>
 </head>
 <body>
   <script>
@@ -56,4 +65,4 @@ export async function onRequest(context) {
   return new Response(html, {
     headers: { 'Content-Type': 'text/html;charset=UTF-8' },
   });
-}
+};
