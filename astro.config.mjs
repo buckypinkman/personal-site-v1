@@ -19,4 +19,9 @@ export default defineConfig({
     mdx(),
   ],
   site: 'https://ranggadimas.dev',
+  // The blog moved to its own app; keep old links working.
+  redirects: {
+    '/blog': 'https://blog.ranggadimas.com',
+    '/blog/[...slug]': 'https://blog.ranggadimas.com',
+  },
 });

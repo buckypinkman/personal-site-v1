@@ -59,7 +59,7 @@ body {
   -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, #000 40%, transparent 95%);
 }
 
-/* Custom Scrollbar for blog/work pages */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
