@@ -1,0 +1,3 @@
+# The blog moved to its own app; keep old links working.
+/blog      https://blog.ranggadimas.com  301
+/blog/*    https://blog.ranggadimas.com  301
